@@ -13,20 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.rgrecour.photocleanup;
+package com.example.photocleanup;
 
 import io.helidon.config.Config;
+import io.helidon.media.jsonp.server.JsonSupport;
 import io.helidon.security.Security;
 import io.helidon.security.integration.webserver.WebSecurity;
-import io.helidon.security.providers.google.login.GoogleTokenProvider;
 import io.helidon.webserver.Routing;
 import io.helidon.webserver.ServerConfiguration;
 import io.helidon.webserver.StaticContentSupport;
 import io.helidon.webserver.WebServer;
+import io.helidon.security.providers.google.login.GoogleTokenProvider;
 import java.io.IOException;
 import java.util.logging.LogManager;
 
-public final class Main {
+final class Main {
 
     private Main() {
     }
@@ -42,6 +43,8 @@ public final class Main {
         // security
         Security security = Security.builder()
                 .addProvider(GoogleTokenProvider.builder()
+                        .proxyHost(System.getProperty("https.proxyHost", null))
+                        .proxyPort(Integer.parseInt(System.getProperty("https.proxyPort", "80")))
                         .clientId(config.get("google-client-id").asString().get()))
                 .build();
         WebSecurity webSecurity = WebSecurity.create(security);
@@ -49,9 +52,8 @@ public final class Main {
         // routes
         Routing.Builder routing = Routing.builder()
                 .register(webSecurity)
-                .register("/api", new PhotoService(
-                        config.get("google-client-id").asString().get(),
-                        config.get("google-client-secret").asString().get()))
+                .register(JsonSupport.create())
+                .register("/api", new PhotoService())
                 .register(StaticContentSupport.builder("/static")
                         .welcomeFileName("index.html")
                         .build());

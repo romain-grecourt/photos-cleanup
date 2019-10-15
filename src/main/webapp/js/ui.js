@@ -240,6 +240,8 @@ function getAccessToken() {
         if (auth_response.id_token === undefined) {
             return undefined;
         }
+        console.log("id_token", auth_response.id_token);
+        console.log("access_token", auth_response.access_token);
         return {
             id_token: auth_response.id_token,
             access_token: auth_response.access_token
